@@ -13,17 +13,41 @@ $('document').ready(function () {
     }
     $('.amenities H4').text(displayedAmenities);
   });
-    
+  const url = 'http://0.0.0.0:5001/api/v1/status/';
+  $.get(url, function (answer) {
+    if (answer.status == 'OK') {
+        $('div#api_status').addClass('available');
+    } else {
+        $('div#api_status').removeClass('available');
+    }
+  });
+
   $.ajax({
-    url: api + ':5001/api/v1/places_search/',
+    url: 'http://0.0.0.0:5001/api/v1/places_search/',
     type: 'POST',
     data: '{}',
     contentType: 'application/json',
     dataType: 'json',
-    success: function (data) {
+    success: appendPlaces
+  });
+
+  $('BUTTON').click(function () {
+    $.ajax({
+        url: 'http://0.0.0.0:5001/api/v1/places_search/',
+        type: 'POST',
+        data: JSON.stringify({'amenities': Object.keys(amenities) }),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: appendPlaces
+    });
+  });
+});
+
+function appendPlaces (data) {
+      $('SECTION.places').empty();
       $('SECTION.places').append(data.map(place => {
         return `<ARTICLE>
-                  <DIV class="title">
+                  <DIV class="title_box">
                     <H2>${place.name}</H2>
                     <DIV class="price_by_night">
                       ${place.price_by_night}
@@ -51,15 +75,4 @@ $('document').ready(function () {
                   </DIV>
                 </ARTICLE>`;
       }));
-    }
-  });  
-
-  const url = 'http://0.0.0.0:5001/api/v1/status/';
-  $.get(url, function (answer) {
-    if (answer.status == 'OK') {
-        $('div#api_status').addClass('available');
-    } else {
-        $('div#api_status').removeClass('available');
-    }
-  });
-});
+  }
